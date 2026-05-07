@@ -3,21 +3,17 @@
 require_once __DIR__ . '/../config/database.php';
 
 class Transaksi extends Database {
-
     public $conn;
 
     public function __construct() {
-
         $this->conn = $this->getConnection();
     }
 
-    // Proses transaksi
     public function transaksi(
         $produk_id,
         $jumlah
     ) {
-
-        // Ambil stok produk
+        
         $cek = $this->conn->prepare(
             "SELECT stok
              FROM produk
@@ -25,25 +21,16 @@ class Transaksi extends Database {
         );
 
         $cek->bindParam(':id', $produk_id);
-
         $cek->execute();
-
         $data = $cek->fetch(PDO::FETCH_ASSOC);
-
         $stok = $data['stok'];
 
-        // Validasi stok
         if ($jumlah > $stok) {
-
             echo "Stok tidak mencukupi.";
-
             return false;
         }
 
-        // Hitung stok baru
         $stokBaru = $stok - $jumlah;
-
-        // Update stok produk
         $update = $this->conn->prepare(
             "UPDATE produk
              SET stok = :stok
@@ -55,7 +42,6 @@ class Transaksi extends Database {
 
         $update->execute();
 
-        // Simpan transaksi
         $sql = $this->conn->prepare(
             "INSERT INTO transaksi
              (produk_id, jumlah)
@@ -70,12 +56,10 @@ class Transaksi extends Database {
         return $sql->execute();
     }
 
-    // Rekap transaksi
     public function rekapTransaksi() {
-
         $sql = "SELECT
                     t.id,
-                    p.nama,
+                    p.nama_produk,
                     t.jumlah,
                     t.tanggal
 
